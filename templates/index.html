@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Risk Assessment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .medical-icon {
+            font-size: 3rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fff;
+            color: #2c3e50;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:valid {
+            border-color: #2ecc71;
+        }
+
+        .unit {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9, #3498db);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .prediction-result {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            border-left: 5px solid #3498db;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prediction-result h3 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .disclaimer {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(241, 196, 15, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #f1c40f;
+        }
+
+        .disclaimer p {
+            color: #856404;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+        }
+
+        .input-info {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="medical-icon">🏥</div>
+            <h1>Diabetes Risk Assessment</h1>
+            <p>Enter your health metrics for a personalized risk evaluation</p>
+        </div>
+
+        <form action="/predict" method="post" id="predictionForm">
+            <div class="form-group">
+                <label for="glucose">Glucose Level</label>
+                <div class="input-wrapper">
+                    <input type="number" id="glucose" name="Glucose" min="0" max="300" step="0.1" required>
+                    <span class="unit">mg/dL</span>
+                </div>
+                <div class="input-info">Normal range: 70-100 mg/dL (fasting)</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bloodpressure">Blood Pressure</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="bloodpressure" name="BloodPressure" min="0" max="200" step="1" required>
+                        <span class="unit">mmHg</span>
+                    </div>
+                    <div class="input-info">Systolic pressure</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="insulin">Insulin Level</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="insulin" name="Insulin" min="0" max="1000" step="0.1" required>
+                        <span class="unit">μU/mL</span>
+                    </div>
+                    <div class="input-info">Normal: 2.6-24.9 μU/mL</div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bmi">Body Mass Index</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="bmi" name="BMI" min="10" max="60" step="0.1" required>
+                        <span class="unit">kg/m²</span>
+                    </div>
+                    <div class="input-info">Normal: 18.5-24.9 kg/m²</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="age" name="Age" min="1" max="120" step="1" required>
+                        <span class="unit">years</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Analyze Risk Factors
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing your health data...</p>
+            </div>
+        </form>
+
+        <div class="prediction-result" id="predictionResult">
+            <h3 id="predictionText">
+                {% if prediction_text %}
+                    {{ prediction_text }}
+                {% else %}
+                    Complete the form above to get your diabetes risk assessment
+                {% endif %}
+            </h3>
+        </div>
+
+        <div class="disclaimer">
+            <p>
+                <strong>Medical Disclaimer:</strong> This tool provides educational estimates only and should not replace professional medical advice. 
+                Always consult with healthcare professionals for accurate diagnosis and treatment recommendations.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced form submission with loading state
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            const loadingDiv = document.getElementById('loading');
+            const submitBtn = document.querySelector('.submit-btn');
+            
+            // Show loading state
+            loadingDiv.style.display = 'block';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Analyzing...';
+            
+            // In a real application, you'd handle the response here
+            // For demo purposes, we'll simulate processing time
+            setTimeout(() => {
+                loadingDiv.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Analyze Risk Factors';
+            }, 2000);
+        });
+
+        // Input validation and formatting
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', function() {
+                // Remove any non-numeric characters except decimal point
+                this.value = this.value.replace(/[^0-9.]/g, '');
+                
+                // Ensure only one decimal point
+                const parts = this.value.split('.');
+                if (parts.length > 2) {
+                    this.value = parts[0] + '.' + parts.slice(1).join('');
+                }
+            });
+
+            // Add visual feedback for validation
+            input.addEventListener('blur', function() {
+                const value = parseFloat(this.value);
+                const min = parseFloat(this.getAttribute('min'));
+                const max = parseFloat(this.getAttribute('max'));
+                
+                if (value < min || value > max || isNaN(value)) {
+                    this.style.borderColor = '#e74c3c';
+                } else {
+                    this.style.borderColor = '#2ecc71';
+                }
+            });
+        });
+
+        // Smooth animations on page load
+        window.addEventListener('load', function() {
+            const container = document.querySelector('.container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(30px)';
+            container.style.transition = 'all 0.6s ease';
+            
+            setTimeout(() => {
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
